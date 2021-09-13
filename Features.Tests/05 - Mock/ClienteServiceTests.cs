@@ -58,7 +58,7 @@ namespace Features.Tests._05___Mock
         }
 
         [Fact(DisplayName = "Deve retornar os clientes ativos")]
-        public void ClienteService_ObterAtivos_DeveObterOsClientesAtivos()
+       public void ClienteService_ObterAtivos_DeveObterOsClientesAtivos()
         {
             // Arrange
             var clienteRepo = new Mock<IClienteRepository>();
