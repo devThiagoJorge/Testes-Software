@@ -38,16 +38,24 @@ namespace NerdStore.Vendas.Domain.Models
             return false;
         }
 
+        private bool PedidoItemExistente(PedidoItem pedidoItem)
+        {
+            return _pedidoItem.Any(x => x.Id == pedidoItem.Id); 
+        }
+
         public void AdicionarItem(PedidoItem pedidoItem)
         {
             if (pedidoItem.Quantidade > MAX_UNIDADES_ITEM) throw new DomainException($"Máximo de ${MAX_UNIDADES_ITEM} unidades por produto");
 
-            if(_pedidoItem.Any(x => x.Id == pedidoItem.Id))
+            if(PedidoItemExistente(pedidoItem))
             {
                 var itemExistente = _pedidoItem.FirstOrDefault(x => x.Id == pedidoItem.Id);
 
                 itemExistente.ContarQuantidade(pedidoItem.Quantidade); // Foi necessário, porq as propriedades são privadas.
                 pedidoItem = itemExistente;
+
+                if(pedidoItem.Quantidade > MAX_UNIDADES_ITEM) throw new DomainException($"Máximo de ${MAX_UNIDADES_ITEM} unidades por produto");
+
                 _pedidoItem.Remove(itemExistente);
             }
            

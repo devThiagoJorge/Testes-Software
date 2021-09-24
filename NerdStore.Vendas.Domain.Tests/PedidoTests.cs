@@ -58,11 +58,26 @@ namespace NerdStore.Vendas.Domain.Tests
         }
 
         [Fact(DisplayName = "Não deve adicionar pois está abaixo do permitido")]
-        public void Trocar_Nome_Metodo()
+        public void AdicionarItemPedido_NovoPedido_DeveRetornarExceptionPoisEstaAbaixoDoNumeroDeUnidadesPermitidos()
         {
             // ARRANGE & ACT & ASSERT
             Assert.Throws<DomainException>(() => new PedidoItem(Guid.NewGuid(), "Nescau", Pedido.MIN_UNIDADES_ITEM - 1, 1));
             
+        }
+
+        [Fact(DisplayName = "Não deve adicionar pois ultrapassa o número de unidades.")]
+        public void AdicionarItemPedido_NovoPedido_DeveRetornarExceptionQuandoAdicionoOMesmoItemNovamenteSendoQueEstaAcimaDoLimitePermitido()
+        {
+            // Arrange
+            var idPedido = Guid.NewGuid();
+            var pedido = Pedido.PedidoFactory.NovoPedidoRascunho(Guid.NewGuid());
+            var pedidoItem = new PedidoItem(idPedido, "Nescau", 1, 2);
+            var pedidoItem2 = new PedidoItem(idPedido, "Nescau", Pedido.MAX_UNIDADES_ITEM, 2);
+            // Act
+            pedido.AdicionarItem(pedidoItem);
+            
+            // Assert
+            Assert.Throws<DomainException>(() => pedido.AdicionarItem(pedidoItem2));
 
         }
     }
