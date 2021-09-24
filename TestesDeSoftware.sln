@@ -37,7 +37,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{4C57B9AA-A37
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Roteiro", "Roteiro", "{13017292-4BE6-4FC2-9D91-6FBD74823F19}"
 	ProjectSection(SolutionItems) = preProject
-		TextFile1.txt = TextFile1.txt
+		Roteiro.txt = Roteiro.txt
 	EndProjectSection
 EndProject
 Global

@@ -9,7 +9,7 @@ namespace NerdStore.Vendas.Domain.Models
     public class Pedido
     {
         public static int MAX_UNIDADES_ITEM => 15;
-        public static int MIN_UNIDADES_ITEM => 0;
+        public static int MIN_UNIDADES_ITEM => 1;
 
         protected Pedido()
         {
@@ -22,12 +22,12 @@ namespace NerdStore.Vendas.Domain.Models
         private readonly List<PedidoItem> _pedidoItem;
         public IReadOnlyCollection<PedidoItem> PedidoItems => _pedidoItem;
 
-        public void CalcularValorPedido()
+        private void CalcularValorPedido()
         {
             ValorTotal = PedidoItems.Sum(x => x.CalcularValor());
         }
 
-        public bool ValidarPedido(PedidoItem pedidoItem)
+        private bool ValidarPedido(PedidoItem pedidoItem)
         {
             if (pedidoItem.Quantidade > 0 && pedidoItem.Quantidade < 15)
             {
@@ -43,23 +43,55 @@ namespace NerdStore.Vendas.Domain.Models
             return _pedidoItem.Any(x => x.Id == pedidoItem.Id); 
         }
 
-        public void AdicionarItem(PedidoItem pedidoItem)
+        private void ValidarQuantidadeMaxima(PedidoItem pedidoItem)
         {
             if (pedidoItem.Quantidade > MAX_UNIDADES_ITEM) throw new DomainException($"Máximo de ${MAX_UNIDADES_ITEM} unidades por produto");
+        }
+        private PedidoItem RecuperarItem(PedidoItem pedidoItem)
+        {
+            return _pedidoItem.FirstOrDefault(x => x.Id == pedidoItem.Id);
+        }
 
-            if(PedidoItemExistente(pedidoItem))
+        public void AdicionarItem(PedidoItem pedidoItem)
+        {
+            ValidarQuantidadeMaxima(pedidoItem);
+
+            if (PedidoItemExistente(pedidoItem))
             {
-                var itemExistente = _pedidoItem.FirstOrDefault(x => x.Id == pedidoItem.Id);
-
+                var itemExistente = RecuperarItem(pedidoItem);
                 itemExistente.ContarQuantidade(pedidoItem.Quantidade); // Foi necessário, porq as propriedades são privadas.
                 pedidoItem = itemExistente;
 
-                if(pedidoItem.Quantidade > MAX_UNIDADES_ITEM) throw new DomainException($"Máximo de ${MAX_UNIDADES_ITEM} unidades por produto");
+                ValidarQuantidadeMaxima(pedidoItem);
 
                 _pedidoItem.Remove(itemExistente);
             }
-           
+          
             _pedidoItem.Add(pedidoItem);
+
+            CalcularValorPedido();
+        }
+
+        public void AtualizarPedido(PedidoItem pedidoItem)
+        {
+            if (!PedidoItemExistente(pedidoItem)) 
+                throw new DomainException("O item não está na lista");
+
+            ValidarQuantidadeMaxima(pedidoItem);
+
+            var pedidoExistente = RecuperarItem(pedidoItem);
+            _pedidoItem.Remove(pedidoExistente);
+            _pedidoItem.Add(pedidoItem);
+
+            CalcularValorPedido();
+        }
+
+        public void RemoverItem(PedidoItem pedidoItem)
+        {
+            if (!PedidoItemExistente(pedidoItem))
+                throw new DomainException("O item não está na lista");
+
+            _pedidoItem.Remove(pedidoItem);
 
             CalcularValorPedido();
         }
