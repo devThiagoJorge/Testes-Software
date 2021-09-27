@@ -28,6 +28,7 @@ namespace NerdStore.Vendas.Domain.Models
         private void CalcularValorPedido()
         {
             ValorTotal = PedidoItems.Sum(x => x.CalcularValor());
+            CalcularTotalAplicandoVoucher();
         }
 
         private bool PedidoItemExistente(PedidoItem pedidoItem)
@@ -98,7 +99,7 @@ namespace NerdStore.Vendas.Domain.Models
             Voucher = voucher;
             VoucherUtilizado = true;
 
-            CalcularTotalAplicandoVoucher(voucher);
+            CalcularTotalAplicandoVoucher();
 
             return validarVoucher;
         }
@@ -108,22 +109,28 @@ namespace NerdStore.Vendas.Domain.Models
             PedidoStatus = PedidoStatus.Rascunho;
         }
 
-        private void CalcularTotalAplicandoVoucher(Voucher voucher)
+        private void CalcularTotalAplicandoVoucher()
         {
             decimal desconto = 0;
 
-            if(voucher.TipoDescontoVoucher == TipoDescontoVoucher.Valor && voucher.ValorDesconto.HasValue)
+            if (!VoucherUtilizado) return;
+
+            if(Voucher.TipoDescontoVoucher == TipoDescontoVoucher.Valor && Voucher.ValorDesconto.HasValue)
             {
-                desconto = voucher.ValorDesconto.Value;
+                desconto = Voucher.ValorDesconto.Value;
             }
-            else if (voucher.TipoDescontoVoucher == TipoDescontoVoucher.Porcentagem && voucher.PercentualDesconto.HasValue)
+            else if (Voucher.TipoDescontoVoucher == TipoDescontoVoucher.Porcentagem && Voucher.PercentualDesconto.HasValue)
             {
-                var percentualDeDesconto = voucher.PercentualDesconto.Value / 100;
+                var percentualDeDesconto = Voucher.PercentualDesconto.Value / 100;
                 desconto = ValorTotal * percentualDeDesconto;
             }
 
             ValorTotal -= desconto;
             Desconto = desconto;
+
+            if(ValorTotal < 0)
+                ValorTotal = 0;
+          
         }
 
         public static class PedidoFactory
