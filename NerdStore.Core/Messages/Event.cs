@@ -1,5 +1,4 @@
-﻿using FluentValidation.Results;
-using MediatR;
+﻿using MediatR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,16 +7,13 @@ using System.Threading.Tasks;
 
 namespace NerdStore.Core.Messages
 {
-    public abstract class Command : Message, IRequest<bool>
+    public abstract class Event : Message, INotification 
     {
         public DateTime Timestamp { get; private set; }
-        public ValidationResult ValidationResult { get; set; }
 
-        protected Command()
+        protected Event()
         {
             Timestamp = DateTime.Now;
         }
-
-        public abstract bool EhValido();
     }
 }
